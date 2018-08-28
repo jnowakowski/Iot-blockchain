@@ -12,6 +12,7 @@ const string INFURA_PATH = "/YOUR_PATH";
 int relayPin = 5;
 int buzzerPin = 4;
 Web3 web3(&INFURA_HOST, &INFURA_PATH);
+WiFiServer server(80);
 
 void eth_call();
 
@@ -37,6 +38,7 @@ void setup() {
     }
 
     USE_SERIAL.println("Connected");
+    server.begin();
 }
 
 void loop() {
@@ -66,8 +68,20 @@ void eth_call() {
       USE_SERIAL.println("Switch ON");
     }
     else
-    { 
+    {
       digitalWrite(relayPin, LOW);
       USE_SERIAL.println("Switch OFF");
     }
+
+    WiFiClient client = server.available();
+    if (client) {
+      USE_SERIAL.println(" ## web client conneted.");
+      client.println("HTTP/1.1 200 OK");
+      client.println("Content-type:text/html");
+      client.println("Connection: close");
+      client.println("");
+      client.println("Contract address: %s", CONTRACT_ADDRESS);
+      client.println("Contract value: %s", value);
+    }
+    client.stop();
 }
