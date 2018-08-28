@@ -82,7 +82,7 @@ void eth_call() {
 
     WiFiClient client = server.available();
     if (client) {
-      USE_SERIAL.println(" ## web client conneted.");
+      Serial.println(" ## web client conneted.");
       client.println("HTTP/1.1 200 OK");
       client.println("Content-type:text/html");
       client.println("Connection: close");
