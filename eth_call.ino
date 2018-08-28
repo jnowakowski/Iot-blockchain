@@ -2,15 +2,18 @@
 #include <Web3.h>
 #include <Contract.h>
 
-#define USE_SERIAL Serial
 #define ENV_SSID     "Krakow"
 #define ENV_WIFI_KEY "8.warszawa.8"
-const string CONTRACT_ADDRESS = "0x13249c8503f3b4a9974f02cc61254df62d6e8a94";
+
+const string CONTRACT_ADDRESS = "0xdeb1331a4b43839ad427d81ebee5ce915171e925";
 const char* ACCOUNT_ADDRESS = "0xdce18b3f54c1ef557d48b98d3521aeda35ccc848";
 const string INFURA_HOST = "ropsten.infura.io";
 const string INFURA_PATH = "/YOUR_PATH";
+
 int relayPin = 5;
 int buzzerPin = 4;
+int lastState = 0;
+
 Web3 web3(&INFURA_HOST, &INFURA_PATH);
 
 void eth_call();
@@ -19,11 +22,11 @@ void setup() {
     pinMode(relayPin, OUTPUT);
     digitalWrite(relayPin, LOW);
     pinMode(buzzerPin, OUTPUT);
-    USE_SERIAL.begin(115200);
+    Serial.begin(115200);
 
     for(uint8_t t = 4; t > 0; t--) {
-        USE_SERIAL.printf("[SETUP] WAIT %d...\n", t);
-        USE_SERIAL.flush();
+        Serial.printf("[SETUP] WAIT %d...\n", t);
+        Serial.flush();
         delay(1000);
     }
 
@@ -36,17 +39,17 @@ void setup() {
         delay(1000);
     }
 
-    USE_SERIAL.println("Connected");
+    Serial.println("Connected");
 }
 
 void loop() {
-    // put your main code here, to run repeatedly:
     delay(2000);
     eth_call();
 }
 
 void eth_call() {
     Contract contract(&web3, &CONTRACT_ADDRESS);
+    
     strcpy(contract.options.from, ACCOUNT_ADDRESS);
     strcpy(contract.options.gasPrice,"2000000000000");
     contract.options.gas = 5000000;
@@ -54,20 +57,24 @@ void eth_call() {
     string param = contract.SetupContractData(&func);
     string result = contract.Call(&param);
     char value = result[result.length()-4];
-    if(value == '1')
+    
+    Serial.println(lastState);
+    if(value == '1' && lastState == 0)
     {
       digitalWrite(relayPin, HIGH);
-      for(int i = 0; i < 1000; i++)
+      for(int i = 0; i < 800; i++)
       {
         if ( i % 2 == 0) digitalWrite(buzzerPin, HIGH);
         else digitalWrite(buzzerPin, LOW);
-        delay(1);
+        delay(2);
       }
-      USE_SERIAL.println("Switch ON");
+      lastState = 1;
+      Serial.println("Switch ON");
     }
-    else
+    else if (value == '0' && lastState == 1)
     { 
       digitalWrite(relayPin, LOW);
-      USE_SERIAL.println("Switch OFF");
+      lastState = 0;
+      Serial.println("Switch OFF");
     }
 }
