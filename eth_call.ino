@@ -10,7 +10,7 @@ const char* ACCOUNT_ADDRESS = "0xdce18b3f54c1ef557d48b98d3521aeda35ccc848";
 const string INFURA_HOST = "ropsten.infura.io";
 const string INFURA_PATH = "/YOUR_PATH";
 int relayPin = 5;
-
+int buzzerPin = 4;
 Web3 web3(&INFURA_HOST, &INFURA_PATH);
 
 void eth_call();
@@ -18,6 +18,7 @@ void eth_call();
 void setup() {
     pinMode(relayPin, OUTPUT);
     digitalWrite(relayPin, LOW);
+    pinMode(buzzerPin, OUTPUT);
     USE_SERIAL.begin(115200);
 
     for(uint8_t t = 4; t > 0; t--) {
@@ -56,6 +57,12 @@ void eth_call() {
     if(value == '1')
     {
       digitalWrite(relayPin, HIGH);
+      for(int i = 0; i < 1000; i++)
+      {
+        if ( i % 2 == 0) digitalWrite(buzzerPin, HIGH);
+        else digitalWrite(buzzerPin, LOW);
+        delay(1);
+      }
       USE_SERIAL.println("Switch ON");
     }
     else
