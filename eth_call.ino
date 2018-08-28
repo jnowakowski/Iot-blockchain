@@ -45,6 +45,7 @@ void setup() {
 }
 
 void loop() {
+    Serial.println(WiFi.localIP());
     delay(2000);
     eth_call();
 }
